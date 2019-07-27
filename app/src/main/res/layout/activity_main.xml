@@ -59,6 +59,7 @@
         android:layout_marginEnd="26dp"
         android:layout_marginRight="26dp"
         android:ems="10"
+        android:hint="Message"
         android:inputType="text"
         android:textColor="#FFEBEE"
         app:layout_constraintEnd_toStartOf="@+id/button3"
@@ -83,6 +84,22 @@
         tools:layout_constraintRight_creator="1"
         tools:layout_constraintTop_creator="1" />
 
+    <Spinner
+        android:id="@+id/spinner2"
+        android:layout_width="match_parent"
+        android:layout_height="21dp"
+        android:layout_marginTop="26dp"
+        android:layout_marginBottom="376dp"
+        android:entries="@array/status_arrays"
+        android:prompt="@string/status_prompt"
+        app:layout_constraintBottom_toTopOf="@+id/button2"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/button3"
+        app:layout_constraintVertical_bias="1.0" />
+
+
     <TextView
         android:id="@+id/textView4"
         android:layout_width="0dp"
@@ -100,7 +117,7 @@
         tools:layout_constraintRight_creator="1"
         tools:layout_editor_absoluteY="49dp" />
 
-<Button
+    <Button
         android:id="@+id/button4"
         android:layout_width="146dp"
         android:layout_height="0dp"

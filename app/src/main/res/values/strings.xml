@@ -5,4 +5,11 @@
     <string name="blockchain">Blockchain</string>
     <string name="pay">Publish</string>
     <string name="title_activity_portal">Portal</string>
+    <string name="status_prompt">What is your current status?</string>
+
+    <string-array name="status_arrays">
+        <item>Safe</item>
+        <item>Maybe in danger</item>
+        <item>In danger</item>
+    </string-array>
 </resources>

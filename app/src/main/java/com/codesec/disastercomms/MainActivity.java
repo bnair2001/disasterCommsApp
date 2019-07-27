@@ -89,6 +89,7 @@ public class MainActivity extends AppCompatActivity {
     Spinner dropdown;
     Button pay, bc, con;
     //int requestCode = 1;
+    Spinner spinner2;
     SharedPreferences pref;
     final Context context = this;
     boolean consensus_bool = false;
@@ -98,6 +99,7 @@ public class MainActivity extends AppCompatActivity {
     Set<String> nodes = new HashSet<String>();
     JSONObject current_location = new JSONObject();
     String usrdeet,usraddress, usrphno, latitude, longitude;
+    String status;
 
 
 
@@ -105,8 +107,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         final Handler handler = new Handler();
-
-
         Runnable run = new Runnable() {
             @Override
             public void run() {
@@ -121,7 +121,7 @@ public class MainActivity extends AppCompatActivity {
         handler.post(run);
 
 
-/*        locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
+/*      locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
         LocationListener locationListenerNetwork = new LocationListener() {
             public void onLocationChanged(Location location) {
                 double longitudeNetwork = location.getLongitude();
@@ -286,6 +286,8 @@ public class MainActivity extends AppCompatActivity {
             pay = (Button) findViewById(R.id.button3);
             bc = (Button) findViewById(R.id.button2);
             con = (Button) findViewById(R.id.button4);
+            spinner2 = (Spinner) findViewById(R.id.spinner2);
+            //status = String.valueOf(spinner2.getSelectedItem());
             //final String usradd = pref.getString("add", "client");
             //final String usrphnumm = pref.getString("phone", "client");
             //String usrnam = pref.getString("num", "client");
@@ -333,10 +335,12 @@ public class MainActivity extends AppCompatActivity {
             pay.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
+
                     usrdeet = usraddress+":"+usrphno;
                     if(consensus_bool) {
                         try {
                         to = dropdown.getSelectedItem().toString();
+                        status = String.valueOf(spinner2.getSelectedItem());
                         EditText amount = (EditText) findViewById(R.id.editText5);
 
                         if(!amount.getText().toString().isEmpty()) {
@@ -351,7 +355,7 @@ public class MainActivity extends AppCompatActivity {
                                     t.put("sender", pref.getString("num", ""));
                                     t.put("receiver", to);
                                     t.put("message", amt);
-                                    t.put("coordinates", coordinates.replaceAll("\n", ""));
+                                    t.put("coordinates", coordinates);
                                     t.put("battery", batpercent);
                                     t.put("userinfo", usrdeet);
                                     new_location(t);
@@ -598,6 +602,7 @@ public class MainActivity extends AppCompatActivity {
                     block.put("latitude", latitude);
                     block.put("longitude", longitude);
                     block.put("userdetails", usrdeet);
+                    block.put("status", status);
                     block.put("message", amt);
                     block.put("battery", batpercent);
                     block.put("nounce", nounce);
