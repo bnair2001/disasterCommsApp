@@ -43,6 +43,7 @@ import com.koushikdutta.async.http.server.AsyncHttpServer;
 import com.koushikdutta.async.http.server.AsyncHttpServerRequest;
 import com.koushikdutta.async.http.server.AsyncHttpServerResponse;
 import com.koushikdutta.async.http.server.HttpServerRequestCallback;
+import com.onesignal.OneSignal;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -94,6 +95,8 @@ public class MainActivity extends AppCompatActivity {
     final Context context = this;
     boolean consensus_bool = false;
     String lati,longi,coordinates;
+    //int selection = dropdown.getCount();
+    //int current_selection;
 
     Set<String> nums = new HashSet<String>();
     Set<String> nodes = new HashSet<String>();
@@ -102,10 +105,13 @@ public class MainActivity extends AppCompatActivity {
     String status;
 
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        OneSignal.startInit(this)
+                .inFocusDisplaying(OneSignal.OSInFocusDisplayOption.Notification)
+                .unsubscribeWhenNotificationsAreDisabled(true)
+                .init();
         final Handler handler = new Handler();
         Runnable run = new Runnable() {
             @Override
@@ -685,6 +691,15 @@ public class MainActivity extends AppCompatActivity {
             //balance.setText("Balance: " + pref.getFloat("balance", 0) + "");
             //trans.setText("" + formatString(pref.getString("locations", "{}")) + "");
             Toast.makeText(MainActivity.this, "Consensus Met", Toast.LENGTH_LONG).show();
+            /*if((selection > 1)&&(current_selection==0)) {
+                selectValue(dropdown, (selection+1));
+                current_selection = current_selection +2;
+            }
+            else {
+                selectValue(dropdown, current_selection);
+                current_selection++;
+            }*/
+
         }
     }
 
@@ -916,6 +931,15 @@ public class MainActivity extends AppCompatActivity {
                     }
                 });
         dialog.show();
+    }
+
+    private void selectValue(Spinner spinner, int spinnerval) {
+        for (int i = 0; i < spinner.getCount(); i++) {
+
+                spinner.setSelection(spinnerval);
+                break;
+
+        }
     }
 
     public static String formatString(String text){

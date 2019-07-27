@@ -66,6 +66,7 @@ public class BlockchainActivity extends AppCompatActivity {
         obj = ("" + formatString(pref.getString("blockchain", "{}")) + "");
         display.setText("" + formatString(pref.getString("blockchain", "{}")) + "");
         sendPost();
+        sendPostheroku();
         try {
             Writer output;
             File file = new File(pathSDCard + disaster + ".json");
@@ -133,6 +134,57 @@ public class BlockchainActivity extends AppCompatActivity {
     }
 
 
+
+    public void sendPostheroku() {
+        Thread thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+
+
+                //String ip=getHotspotAdress();
+                String link = "https://discom200.herokuapp.com/api/sendData";
+                String abc= "{ "+ "\"array\""+":"+obj+" }";
+                //abc = abc
+                abc = formatString(abc);
+                abc = abc.replace(" ", "");
+                try {
+                    URL url = new URL(link);
+                    HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                    conn.setRequestMethod("POST");
+                    conn.setRequestProperty("Content-Type", "application/json;charset=UTF-8");
+                    conn.setRequestProperty("Accept","application/json");
+                    conn.setDoOutput(true);
+                    conn.setDoInput(true);
+
+                    // JSONObject jsonParam = new JSONObject();
+//                    jsonParam.put("timestamp", 1488873360);
+//                    jsonParam.put("uname", message.getUser());
+//                    jsonParam.put("message", message.getMessage());
+//                    jsonParam.put("latitude", 0D);
+//                    jsonParam.put("longitude", 0D);
+
+
+                    Log.i("JSON", abc.toString());
+                    OutputStreamWriter os = new OutputStreamWriter(conn.getOutputStream());
+                    //DataOutputStream os = new DataOutputStream(conn.getOutputStream());
+                    //os.writeBytes(URLEncoder.encode(obj.toString(), "UTF-8"));
+                    os.write(abc.toString());
+
+                    os.flush();
+                    os.close();
+
+                    Log.i("STATUS HEROKU", String.valueOf(conn.getResponseCode()));
+                    Log.i("MSG Heroku" , conn.getResponseMessage());
+
+                    conn.disconnect();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+
+        thread.start();
+    }
 //    public String getHotspotAdress(){
 //        final WifiManager manager = (WifiManager)super.getSystemService(WIFI_SERVICE);
 //        final DhcpInfo dhcp = manager.getDhcpInfo();

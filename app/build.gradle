@@ -1,3 +1,16 @@
+buildscript {
+    repositories {
+        maven { url 'https://plugins.gradle.org/m2/'}
+    }
+    dependencies {
+        classpath 'gradle.plugin.com.onesignal:onesignal-gradle-plugin:[0.11.0, 0.99.99]'
+    }
+}
+apply plugin: 'com.onesignal.androidsdk.onesignal-gradle-plugin'
+
+repositories {
+    maven { url 'https://maven.google.com' }
+}
 apply plugin: 'com.android.application'
 apply plugin: 'com.google.gms.google-services'
 
@@ -7,6 +20,11 @@ android {
     useLibrary 'org.apache.http.legacy'
     defaultConfig {
         applicationId 'com.codesec.disastercomms'
+        manifestPlaceholders = [
+                onesignal_app_id: '00538282-1f68-4204-b0ba-5bdfccec2c9d',
+                // Project number pulled from dashboard, local value is ignored.
+                onesignal_google_project_number: 'REMOTE'
+        ]
         minSdkVersion 15
         targetSdkVersion 26
         versionCode 1
@@ -25,6 +43,7 @@ dependencies {
     implementation 'com.android.support:design:26.1.0'
     implementation 'com.loopj.android:android-async-http:1.4.9'
     implementation 'com.google.firebase:firebase-messaging:17.3.4'
+    implementation 'com.onesignal:OneSignal:[3.9.1, 3.99.99]'
     compile fileTree(dir: 'libs', include: ['*.jar'])
     androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
         exclude group: 'com.android.support', module: 'support-annotations'
