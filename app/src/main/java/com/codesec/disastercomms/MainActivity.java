@@ -1,6 +1,8 @@
 package com.codesec.disastercomms;
 
 import android.Manifest;
+import android.app.DownloadManager;
+import android.app.VoiceInteractor;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -38,6 +40,13 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
 import com.koushikdutta.async.AsyncServer;
 import com.koushikdutta.async.http.server.AsyncHttpServer;
 import com.koushikdutta.async.http.server.AsyncHttpServerRequest;
@@ -45,6 +54,11 @@ import com.koushikdutta.async.http.server.AsyncHttpServerResponse;
 import com.koushikdutta.async.http.server.HttpServerRequestCallback;
 import com.onesignal.OneSignal;
 
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -57,6 +71,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.InetAddress;
 import java.net.URL;
@@ -72,6 +87,7 @@ import java.util.Timer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+
 public class MainActivity extends AppCompatActivity {
     String amt, to;
     double frequency;
@@ -82,6 +98,7 @@ public class MainActivity extends AppCompatActivity {
     LocationManager locationManager;
     LocationListener locationListener;
     //int success;
+    RequestQueue mQueue;
 
 
 
@@ -102,31 +119,34 @@ public class MainActivity extends AppCompatActivity {
     Set<String> nodes = new HashSet<String>();
     JSONObject current_location = new JSONObject();
     String usrdeet,usraddress, usrphno, latitude, longitude;
-    String status;
+    String status, urlString;
 
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
         OneSignal.startInit(this)
                 .inFocusDisplaying(OneSignal.OSInFocusDisplayOption.Notification)
                 .unsubscribeWhenNotificationsAreDisabled(true)
                 .init();
+        urlString = "http://192.168.4.1:5000/updateCheck";
         final Handler handler = new Handler();
         Runnable run = new Runnable() {
             @Override
             public void run() {
                 wifirange();
                 double answer = calculateDistance(signal, frequency);
+
                 Toast.makeText(MainActivity.this, "Distance in (m): "+ answer, Toast.LENGTH_SHORT).show();
                 //con.performClick();
-                handler.postDelayed(this, 300000);
+                handler.postDelayed(this, 30000);
                 //new consensus().execute("");
             }
         };
         handler.post(run);
 
-
+        mQueue  = Volley.newRequestQueue(this);
+        clubchain();
 /*      locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
         LocationListener locationListenerNetwork = new LocationListener() {
             public void onLocationChanged(Location location) {
@@ -155,13 +175,13 @@ public class MainActivity extends AppCompatActivity {
             locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListenerNetwork);
         }*/
 
-
        TelephonyManager telephonyManager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
         PhoneStateListener signalListener = new PhoneStateListener() {
             public void onSignalStrengthChanged(int asu) {
                 //asu is the signal strength
                 if(asu<0) {
                     Toast.makeText(MainActivity.this, "Mobile network detected, So please switch to mobile data in order to upload the blockchain !!", Toast.LENGTH_LONG).show();
+                    //sendPostheroku();
                 }
                 }
         };
@@ -607,7 +627,8 @@ public class MainActivity extends AppCompatActivity {
                     block.put("time", currentDateTimeString);
                     block.put("latitude", latitude);
                     block.put("longitude", longitude);
-                    block.put("userdetails", usrdeet);
+                    block.put("address", usraddress);
+                    block.put("phno", usrphno);
                     block.put("status", status);
                     block.put("message", amt);
                     block.put("battery", batpercent);
@@ -728,10 +749,6 @@ public class MainActivity extends AppCompatActivity {
         return response.toString();
     }
 
-    public void piweb(View view){
-        Intent myIntent = new Intent(this, Portal.class);
-        startActivity(myIntent);
-    }
 
     public void sendMessage(View view)
     {
@@ -890,6 +907,7 @@ public class MainActivity extends AppCompatActivity {
                                 usrphno = number.getText().toString();
                                 pref.edit().putString("add", usraddress).apply();
                                 pref.edit().putString("phno", usrphno).apply();
+
                             }
                         })
                 .setNegativeButton("Cancel",
@@ -941,6 +959,94 @@ public class MainActivity extends AppCompatActivity {
 
         }
     }
+public void updatechain() throws IOException{
+    HttpClient httpclient = new DefaultHttpClient();
+    HttpGet httpget= new HttpGet("http://192.168.4.1:5000/updateCheck");
+
+    HttpResponse response = httpclient.execute(httpget);
+
+    if(response.getStatusLine().getStatusCode()==200){
+        String server_response = EntityUtils.toString(response.getEntity());
+        Log.i("Server response", server_response );
+    } else {
+        Log.i("Server response", "Failed to get server response" );
+    }
+}
+    public void sendPostheroku() {
+        Thread thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+
+                String obj = ("" + formatString(pref.getString("blockchain", "{}")) + "");
+                //String ip=getHotspotAdress();
+                String link = "https://discom200.herokuapp.com/api/sendData";
+                String abc= "{ "+ "\"array\""+":"+obj+" }";
+                //abc = abc
+                abc = formatString(abc);
+                abc = abc.replace(" ", "");
+                try {
+                    URL url = new URL(link);
+                    HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                    conn.setRequestMethod("POST");
+                    conn.setRequestProperty("Content-Type", "application/json;charset=UTF-8");
+                    conn.setRequestProperty("Accept","application/json");
+                    conn.setDoOutput(true);
+                    conn.setDoInput(true);
+
+                    // JSONObject jsonParam = new JSONObject();
+//                    jsonParam.put("timestamp", 1488873360);
+//                    jsonParam.put("uname", message.getUser());
+//                    jsonParam.put("message", message.getMessage());
+//                    jsonParam.put("latitude", 0D);
+//                    jsonParam.put("longitude", 0D);
+
+
+                    Log.i("JSON", abc.toString());
+                    OutputStreamWriter os = new OutputStreamWriter(conn.getOutputStream());
+                    //DataOutputStream os = new DataOutputStream(conn.getOutputStream());
+                    //os.writeBytes(URLEncoder.encode(obj.toString(), "UTF-8"));
+                    os.write(abc.toString());
+
+                    os.flush();
+                    os.close();
+
+                    Log.i("STATUS HEROKU", String.valueOf(conn.getResponseCode()));
+                    Log.i("MSG Heroku" , conn.getResponseMessage());
+
+                    conn.disconnect();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+
+        thread.start();
+    }
+
+    public void clubchain() {
+        String url ="http://192.168.4.1:5000/updateCheck";
+
+// Request a string response from the provided URL.
+        StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        // Display the first 500 characters of the response string.
+                        //textView.setText("Response is: "+ response.substring(0,500));
+
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                //textView.setText("That didn't work!");
+            }
+        });
+
+// Add the request to the RequestQueue.
+        mQueue.add(stringRequest);
+    }
+
+
 
     public static String formatString(String text){
 

@@ -89,7 +89,7 @@ public class BlockchainActivity extends AppCompatActivity {
 
 
         //String ip=getHotspotAdress();
-                String link = "http://192.168.1.104:6000/sendData";
+                String link = "http://192.168.4.1:3000/sendData";
                 String abc= "{ "+ "\"array\""+":"+obj+" }";
                 //abc = abc
                 abc = formatString(abc);

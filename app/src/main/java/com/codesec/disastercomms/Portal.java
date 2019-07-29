@@ -2,11 +2,7 @@ package com.codesec.disastercomms;
 
 import android.graphics.Bitmap;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
-import android.view.View;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -18,7 +14,7 @@ public class Portal extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_portal);
 
-        WebView mywebView = (WebView) findViewById(R.id.webView);
+        WebView mywebView = (WebView) findViewById(R.id.webView2);
         WebSettings webSettings = mywebView.getSettings();
         webSettings.setJavaScriptEnabled(true);
         mywebView.loadUrl("http://192.168.4.1/portal.html");
